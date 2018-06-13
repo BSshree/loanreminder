@@ -30,7 +30,7 @@ return [
             'baseUrl' => '',
         ],
             'user' => [
-            'identityClass' => 'common\models\User',
+            'identityClass' => 'common\models\Users',
             'enableSession' => false,
             'loginUrl' => null,
         ],
@@ -56,7 +56,7 @@ return [
              'enableStrictParsing' => false,
             'showScriptName' => false,
             'rules' => [
-                 ['class' => 'yii\rest\UrlRule', 'controller' => 'api/v1/users'],
+                 ['class' => 'yii\rest\UrlRule', 'controller' => ['api/v1/users'], 'extraPatterns' => ['GET aboutus' => 'aboutus']],
                  ['class' => 'yii\rest\UrlRule', 'controller' => 'api/v1/contacts'],
                 
             ],

@@ -3,6 +3,9 @@
 namespace common\models;
 
 use Yii;
+use yii\base\NotSupportedException;
+use yii\web\IdentityInterface;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "users".
@@ -15,7 +18,7 @@ use Yii;
  * @property string $profile_image
  * @property int $status
  */
-class Users extends \yii\db\ActiveRecord {
+class Users extends \yii\db\ActiveRecord implements IdentityInterface {
 
     /**
      * @inheritdoc
@@ -23,6 +26,8 @@ class Users extends \yii\db\ActiveRecord {
     public $old_pass;
     public $new_pass;
     public $confirm_pass;
+    public $title;
+    public $content;
 
     public static function tableName() {
         return '{{%users}}';
@@ -35,12 +40,12 @@ class Users extends \yii\db\ActiveRecord {
         return [
                 [['password', 'email'], 'required', 'on' => 'register'],
                 [['status'], 'integer'],
-                [['username', 'password', 'profile_image'], 'string', 'max' => 255],
+                [['username', 'password'], 'string', 'max' => 255],
                 [['auth_key'], 'string', 'max' => 32],
                 [['email'], 'string', 'max' => 64],
                 [['email'], 'unique'],
                 ['email', 'email'],
-                [['profile_image'], 'file'],
+               // [['profile_image'], 'file'],
                 [['old_pass', 'new_pass', 'confirm_pass'], 'required', 'on' => 'changepassword'],
                 ['old_pass', 'findPasswords', 'on' => 'changepassword'],
                 ['confirm_pass', 'compare', 'compareAttribute' => 'new_pass', 'on' => 'changepassword'],
@@ -61,6 +66,25 @@ class Users extends \yii\db\ActiveRecord {
             $this->addError($attribute, 'Old password is incorrect');
     }
 
+    public static function findIdentityByAccessToken($token, $type = null) {
+        return static::findOne(['auth_key' => $token]);
+    }
+    
+    public function getAuthKey() {
+        return $this->auth_key;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function validateAuthKey($authKey) {
+        return $this->getAuthKey() === $authKey;
+    }
+    
+    public static function findIdentity($id) {
+        return static::findOne(['user_id' => $id, 'status' => self::STATUS_ACTIVE]);
+    }
+    
     /**
      * @inheritdoc
      */
@@ -71,7 +95,7 @@ class Users extends \yii\db\ActiveRecord {
             'auth_key' => 'Auth Key',
             'password' => 'Password',
             'email' => 'Email',
-            'profile_image' => 'Profile Image',
+           // 'profile_image' => 'Profile Image',
             'status' => 'Status',
         ];
     }
